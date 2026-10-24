@@ -1,0 +1,35 @@
+# ── 私人物品（绝不上传）──
+.env
+.auth_token
+*.db
+
+# Python
+__pycache__/
+*.pyc
+.venv/
+venv/
+dist/
+build/
+*.egg-info/
+
+# Android
+android_fullstack/.gradle/
+android_fullstack/build/
+android_fullstack/app/build/
+android_fullstack/local.properties
+*.apk
+*.keystore
+
+# 桌面打包产物
+*.exe
+
+# 日志与测试/压测残留
+*.log
+_stress_*.json*
+_evaluation_*.md
+_memory_agent.log
+
+# IDE / 系统
+.idea/
+.vscode/
+Thumbs.db

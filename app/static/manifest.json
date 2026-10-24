@@ -1,0 +1,26 @@
+{
+  "name": "小禾",
+  "short_name": "小禾",
+  "description": "慢慢说，我在。",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "orientation": "portrait",
+  "theme_color": "#FDFBF7",
+  "background_color": "#FDFBF7",
+  "lang": "zh-CN",
+  "icons": [
+    {
+      "src": "/static/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/static/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}

@@ -1,0 +1,8 @@
+<resources xmlns:tools="http://schemas.android.com/tools">
+    <style name="Theme.XiaoHe" parent="Theme.MaterialComponents.DayNight.NoActionBar">
+        <!-- 启动背景用暖色调，与小禾风格一致 -->
+        <item name="android:windowBackground">#FDFBF7</item>
+        <item name="android:statusBarColor" tools:targetApi="l">@android:color/transparent</item>
+        <item name="android:navigationBarColor" tools:targetApi="o_mr1">@android:color/transparent</item>
+    </style>
+</resources>
