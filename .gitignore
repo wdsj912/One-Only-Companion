@@ -27,6 +27,7 @@ android_fullstack/local.properties
 *.log
 _stress_*.json*
 _evaluation_*.md
+_*_audit_report.md
 _memory_agent.log
 
 # IDE / 系统
