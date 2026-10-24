@@ -1461,8 +1461,30 @@
     if (!file || streaming) return;
     compressImage(file, function (url) { onChatImagePicked(url); });
   }
-  // 视频：只本地渲染播放器 + 给 AI 一句占位文字。
-  // 绝不 base64 整段视频（几十 MB 会直接撑爆内存，且视觉模型也不收视频）。
+  // 视频：本地渲染播放器，并抽一帧给视觉模型"看懂"内容。
+  // 绝不 base64 整段视频（几十 MB 会撑爆内存）——只截中间一帧 JPEG。
+  function captureVideoFrame(url, cb) {
+    var v = document.createElement("video");
+    v.muted = true; v.playsInline = true; v.preload = "auto"; v.src = url;
+    var done = false;
+    function finish(dataUrl) { if (!done) { done = true; cb(dataUrl); } }
+    v.addEventListener("loadedmetadata", function () {
+      try { v.currentTime = Math.min(1, (v.duration || 2) / 2); } catch (e) { finish(null); }
+    });
+    v.addEventListener("seeked", function () {
+      try {
+        var w = v.videoWidth, h = v.videoHeight;
+        if (!w || !h) { finish(null); return; }
+        var scale = Math.min(1, 720 / w);
+        var c = document.createElement("canvas");
+        c.width = Math.round(w * scale); c.height = Math.round(h * scale);
+        c.getContext("2d").drawImage(v, 0, 0, c.width, c.height);
+        finish(c.toDataURL("image/jpeg", 0.82));
+      } catch (e) { finish(null); }
+    });
+    v.addEventListener("error", function () { finish(null); });
+    setTimeout(function () { finish(null); }, 8000); // 解码失败兜底
+  }
   function handleChatVideoChange() {
     var file = this.files && this.files[0];
     this.value = "";
@@ -1470,7 +1492,13 @@
     var url;
     try { url = URL.createObjectURL(file); } catch (e) { toast("这个视频读不出来…", "err"); return; }
     appendMessage("user", "", { video: url });
-    sendText("[用户发送了一段视频]", { skipUserBubble: true });
+    captureVideoFrame(url, function (frame) {
+      if (frame) {
+        sendText("看看这段视频", { image: frame, media_kind: "video", skipUserBubble: true });
+      } else {
+        sendText("[用户发送了一段视频，但画面截不出来，可以让她猜]", { skipUserBubble: true });
+      }
+    });
   }
   $("image-input").addEventListener("change", handleChatImageChange);
   $("camera-input").addEventListener("change", handleChatImageChange);
@@ -1513,7 +1541,8 @@
         });
         if (!resp.ok) { setStatus("头像没传上去，再试一次？"); return; }
         var data = await resp.json();
-        applyMyAvatar(data.avatar_url || "");
+        // 同名文件内容变了但 URL 没变，WebView 会吃缓存——加时间戳强制刷新
+        applyMyAvatar(data.avatar_url ? data.avatar_url + "?t=" + Date.now() : "");
         setStatus("头像换好啦");
       } catch (e) {
         setStatus("头像没传上去，再试一次？");

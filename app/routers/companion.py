@@ -229,7 +229,8 @@ async def get_avatar(fname: str):
     path = _AVATAR_DIR / safe
     if not safe or not path.is_file():
         raise HTTPException(status_code=404, detail="not found")
-    return FileResponse(str(path))
+    # 同名覆盖上传后 URL 不变，禁缓存让客户端总能拿到新头像
+    return FileResponse(str(path), headers={"Cache-Control": "no-cache"})
 
 
 @router.post("/apply-drift")

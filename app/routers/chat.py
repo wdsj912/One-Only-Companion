@@ -111,9 +111,10 @@ async def _expand_media(req: "SendMessageRequest") -> str:
     kind = "video" if (req.media_kind or "").lower() == "video" else "image"
     label = "视频" if kind == "video" else "图片"
     desc = await describe_image(req.image, kind)
+    unit = "段" if kind == "video" else "张"
     if desc:
-        return f"[用户发了一张{label}，描述：{desc}] {req.text}"
-    return f"[用户发了一张{label}，但在你的视角里是模糊的，你可以自然地请对方用文字描述] {req.text}"
+        return f"[用户发了一{unit}{label}，描述：{desc}] {req.text}"
+    return f"[用户发了一{unit}{label}，但在你的视角里是模糊的，你可以自然地请对方用文字描述] {req.text}"
 
 
 class SendMessageRequest(BaseModel):
