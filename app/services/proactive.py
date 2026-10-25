@@ -252,6 +252,7 @@ async def run_proactive_tick() -> None:
 
             try:
                 await generate_proactive_message(session, conv.id, user.id, hours_ago=idle_hours)
+                logger.info("proactive poke fired for user %s (idle %.1fh)", user.id, idle_hours)
             except Exception as exc:
                 logger.warning("proactive tick failed for user %s: %s", user.id, exc)
                 try:

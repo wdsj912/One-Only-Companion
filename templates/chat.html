@@ -2673,6 +2673,19 @@
     await Promise.all([loadCompanion(), loadMemories()]);
   }
 
+  // 主动消息"补票"：Android 后台进程会被系统冻结，30 分钟一次的调度器跟着停走。
+  // 打开 App / 从后台切回（离开 ≥15 分钟）时戳一下后端立即检查一次，
+  // 后端闸门（时段/静默 1h/每日 2 条/2h 冷却）照常生效。
+  function pokeProactive() {
+    try { fetch("/api/companion/proactive-poke", { method: "POST", credentials: "same-origin" }); } catch (e) {}
+  }
+  var _bgSince = 0;
+  document.addEventListener("visibilitychange", function () {
+    if (document.hidden) { _bgSince = Date.now(); return; }
+    if (_bgSince && Date.now() - _bgSince > 15 * 60 * 1000) pokeProactive();
+    _bgSince = 0;
+  });
+
   async function pollProactiveMessages() {
     if (streaming || !currentConversationId) return;
     try {
@@ -2721,6 +2734,7 @@
     await initChat();
     await refreshAll();
     await loadSettings(true);
+    pokeProactive(); // 启动即补票：进程刚被唤醒时调度器要等下个 30 分钟 tick
   }
 
   /* ============================ 启动：先处理 URL token，再 boot ============================ */

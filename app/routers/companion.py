@@ -1,6 +1,7 @@
 """Companion + proactive preferences routes."""
 from __future__ import annotations
 
+import asyncio
 import base64
 import re
 from pathlib import Path
@@ -179,6 +180,25 @@ async def update(req: UpdateCompanionRequest, user_id: int = 1, session: AsyncSe
         current_activity=activity,
         avatar_url=user.avatar_url,
     )
+
+
+# --- 主动消息 ---------------------------------------------------------------
+
+
+@router.post("/proactive-poke")
+async def proactive_poke():
+    """App 打开/回到前台时由前端调用：立刻跑一次主动消息检查。
+
+    后台异步执行、立即返回。所有闸门（时段/静默时长/每日上限/冷却）在
+    run_proactive_tick 内照常生效——Android 后台进程被冻结时调度器停走，
+    这个接口是回到前台后的"补票"通道。
+    """
+    try:
+        from app.services.proactive import run_proactive_tick
+        asyncio.create_task(run_proactive_tick())
+    except Exception:
+        pass
+    return {"ok": True}
 
 
 # --- 头像 -----------------------------------------------------------------
