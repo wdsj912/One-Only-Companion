@@ -177,6 +177,8 @@ def create_app() -> FastAPI:
     app.include_router(companion.router, dependencies=protected)
     app.include_router(moments.router, dependencies=protected)
     app.include_router(settings_router.router, dependencies=protected)
+    from app.routers import bridge
+    app.include_router(bridge.router)  # OpenAI 兼容桥：自带 Bearer 鉴权
 
     # ---------------------------------------------------------------
     # App-level rate limiter — simple in-memory sliding window.

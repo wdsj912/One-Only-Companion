@@ -1,0 +1,33 @@
+services:
+  astrbot:
+    image: soulter/astrbot:latest
+    container_name: astrbot
+    restart: unless-stopped
+    ports:
+      - "6185:6185"   # AstrBot WebUI
+      - "6199:6199"   # aiocqhttp 反向 WS 接收端口
+    volumes:
+      - ./astrbot/data:/AstrBot/data
+    networks:
+      - qqbot
+
+  napcat:
+    image: mlikiowa/napcat-docker:latest
+    container_name: napcat
+    restart: unless-stopped
+    ports:
+      - "6099:6099"   # NapCat WebUI
+    environment:
+      - TZ=Asia/Shanghai
+      - WEBUI_TOKEN=xiaohe2026
+      # ⚠️ 在这里填你的 QQ 小号号码（不要用大号！）
+      - ACCOUNT=YOUR_QQ_NUMBER
+    volumes:
+      - ./napcat/QQ:/app/.config/QQ
+      - ./napcat/config:/app/napcat/config
+    networks:
+      - qqbot
+
+networks:
+  qqbot:
+    driver: bridge
